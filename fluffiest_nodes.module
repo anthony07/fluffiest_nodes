@@ -1,0 +1,61 @@
+<?php
+	// $Id$
+
+  /**
+   * Function that Retrieves the most visited nodes in the DB
+   */
+  function fluffiest_nodes(){
+    $result = db_query("SELECT nid FROM {node_counter} ORDER BY daycount DESC LIMIT 3");
+    $nodes = array();
+    if(!empty($result)){
+      foreach($result as $row){
+         $nodes[] = $row->nid;
+      }
+    }
+    return $nodes;
+  }
+
+  function check_fluffiest_nodes() {
+    $fluffiest_nodes = fluffiest_nodes();
+    variable_set('fluffiest_nodes', $fluffiest_nodes);
+  }
+
+  function fluffiest_nodes_cron(){
+    check_fluffiest_nodes();
+  }
+
+  /**
+   * Implements hook_block_info()
+   */
+  function fluffiest_nodes_block_info(){
+    $blocks['fluffiest_nodes'] = array(  'info' => t('Fluffiest Stories'), 'cache' => DRUPAL_CACHE_GLOBAL,);
+    return $blocks;
+  }
+
+  /**
+   * Implements hook_block_view()
+   */
+  function fluffiest_nodes_block_view($delta = ''){
+    $block = array();
+    $output = "<ul id='fluffiest-nodes-list'>";
+    $items = variable_get('fluffiest_nodes', array());
+
+    foreach($items as $item){
+      $node = node_load($item);
+      $title = $node -> title;
+      $url = url('node/' . $item, array('absolute' => TRUE));
+      $image =  $node -> field_image['und'][0];
+      $output .= "<li class='fluffy-node'><a href='{$url}'>" . retrieve_image($image['uri'], $image['filename']);
+      $output .= "<h4>{$title}</h4></a>
+                  <div class='clear'></div></li>";
+    }
+
+    $block['subject'] = t('Fluffiest Stories');
+    $block['content'] = $output . "</ul>";
+    return $block;
+  }
+
+  function retrieve_image($uri, $name){
+    $url = image_style_url('thumbnail', $uri);
+    return "<img src='{$url}' alt='{$name}' />";
+  }

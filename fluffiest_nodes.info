@@ -1,0 +1,7 @@
+;$Id$
+name = "Fluffiest Nodes"
+description = Customized Most Visited Nodes Block Module
+package = Fluffy Utilities
+dependencies[] = statistics
+core = 7.x
+files[] = fluffiest_nodes.module
