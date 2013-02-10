@@ -5,7 +5,7 @@
    * Function that Retrieves the most visited nodes in the DB
    */
   function fluffiest_nodes(){
-    $result = db_query("SELECT nid FROM {node_counter} ORDER BY daycount DESC LIMIT 3");
+    $result = db_query("SELECT nid FROM {node_counter} ORDER BY daycount DESC LIMIT 5");
     $nodes = array();
     if(!empty($result)){
       foreach($result as $row){
@@ -47,6 +47,7 @@
       $image =  $node -> field_image['und'][0];
       $output .= "<li class='fluffy-node'><a href='{$url}'>" . retrieve_image($image['uri'], $image['filename']);
       $output .= "<h4>{$title}</h4></a>
+                  <p class='author'>{$node -> name}</p>
                   <div class='clear'></div></li>";
     }
 
