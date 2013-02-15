@@ -60,3 +60,7 @@
     $url = image_style_url('thumbnail', $uri);
     return "<img src='{$url}' alt='{$name}' />";
   }
+
+  function fluffiest_nodes_menu_alter(&$items) {
+    unset($items['rss.xml']);
+  }
