@@ -5,7 +5,7 @@
    * Function that Retrieves the most visited nodes in the DB
    */
   function fluffiest_nodes(){
-    $result = db_query("SELECT nid FROM {node_counter} WHERE nid != 4 AND type == 'article' ORDER BY daycount DESC LIMIT 5");
+    $result = db_query("SELECT t2.nid FROM node t2 INNER JOIN node_counter t1 ON t2.nid = t1.nid WHERE t2.nid != 4 AND t2.type = 'article' ORDER BY t1.daycount DESC LIMIT 5");
     $nodes = array();
     if(!empty($result)){
       foreach($result as $row){
