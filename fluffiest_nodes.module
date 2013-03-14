@@ -1,8 +1,8 @@
 <?php
-	// $Id$
+  // $Id$
 
   /**
-   * Function that Retrieves the most visited nodes in the DB
+   * Function that Retrieves the most visited nodes in the database
    */
   function fluffiest_nodes(){
     $result = db_query("SELECT t2.nid FROM node t2 INNER JOIN node_counter t1 ON t2.nid = t1.nid WHERE t2.nid != 4 AND t2.type = 'article' ORDER BY t1.daycount DESC LIMIT 5");
@@ -15,17 +15,23 @@
     return $nodes;
   }
 
+  /**
+   * Store Retrieved Nodes
+   */
   function check_fluffiest_nodes() {
     $fluffiest_nodes = fluffiest_nodes();
     variable_set('fluffiest_nodes', $fluffiest_nodes);
   }
 
+  /**
+   * Include to Cron job
+   */
   function fluffiest_nodes_cron(){
     check_fluffiest_nodes();
   }
 
   /**
-   * Implements hook_block_info()
+   * Block information
    */
   function fluffiest_nodes_block_info(){
     $blocks['fluffiest_nodes'] = array(  'info' => t('Fluffiest Stories'), 'cache' => DRUPAL_CACHE_GLOBAL,);
@@ -33,7 +39,7 @@
   }
 
   /**
-   * Implements hook_block_view()
+   * Block title and content
    */
   function fluffiest_nodes_block_view($delta = ''){
     $block = array();
