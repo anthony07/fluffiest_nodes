@@ -2,68 +2,74 @@
   // $Id$
 
   /**
-   * Function that Retrieves the most visited nodes in the database
+   * Function that Retrieves the most visited nodes in the DB
    */
   function fluffiest_nodes(){
     $result = db_query("SELECT t2.nid FROM node t2 INNER JOIN node_counter t1 ON t2.nid = t1.nid WHERE t2.nid != 4 AND t2.type = 'article' ORDER BY t1.daycount DESC LIMIT 5");
     $nodes = array();
-    if(!empty($result)){
-      foreach($result as $row){
-         $nodes[] = $row->nid;
-      }
-    }
+
+    if(!empty($result))
+      foreach($result as $row)
+        $nodes[] = $row->nid;
+
     return $nodes;
   }
 
-  /**
-   * Store Retrieved Nodes
-   */
   function check_fluffiest_nodes() {
     $fluffiest_nodes = fluffiest_nodes();
     variable_set('fluffiest_nodes', $fluffiest_nodes);
   }
 
-  /**
-   * Include to Cron job
-   */
   function fluffiest_nodes_cron(){
     check_fluffiest_nodes();
   }
 
   /**
-   * Block information
+   * Implements hook_block_info()
    */
   function fluffiest_nodes_block_info(){
-    $blocks['fluffiest_nodes'] = array(  'info' => t('Fluffiest Stories'), 'cache' => DRUPAL_CACHE_GLOBAL,);
+    $blocks['fluffiest_nodes'] = array(  'info' => t('Most Seen Stories'), 'cache' => DRUPAL_CACHE_GLOBAL,);
     return $blocks;
   }
 
   /**
-   * Block title and content
+   * Implements hook_block_view()
    */
   function fluffiest_nodes_block_view($delta = ''){
     $block = array();
     $output = "<ul id='fluffiest-nodes-list'>";
     $items = variable_get('fluffiest_nodes', array());
 
+    $index = 0;
     foreach($items as $item){
       $node = node_load($item);
       $title = $node -> title;
+      $author = $node -> name;
+      $date = format_date($node -> created, 'custom', 'M d, Y');
       $url = url('node/' . $item, array('absolute' => TRUE));
       $image =  $node -> field_image['und'][0];
-      $output .= "<li class='fluffy-node'><a href='{$url}'>" . retrieve_image($image['uri'], $image['filename']);
+      $output .= "<li class='fluffy-node clearfix'><a href='{$url}'>";
+      $image_style = ($index == 0) ? 'teaser' : 'thumbnail';
+      $output .= retrieve_image($image['uri'], $image['filename'], $image_style);
       $output .= "<h4>{$title}</h4></a>
-                  <p class='author'>{$node -> name}</p>
-                  <div class='clear'></div></li>";
+                  <p class='submitted'>
+                    <span class='author'>{$author}</span>
+                    <span class='created'>{$date}</span>
+                  </p>
+                  </li>";
+      $index++;
     }
 
-    $block['subject'] = t('Fluffiest Stories');
-    $block['content'] = $output . "</ul>";
+    $complete_event = '<script class="shout-script">jQuery("#fluffiest-nodes-list").trigger("fluffiestNodesRendered");</script>';
+
+    $block['subject'] = t('Most Seen Stories');
+    $block['content'] = $output . "</ul>" . $complete_event;
+
     return $block;
   }
 
-  function retrieve_image($uri, $name){
-    $url = image_style_url('thumbnail', $uri);
+  function retrieve_image($uri, $name, $style){
+    $url = image_style_url($style, $uri);
     return "<img src='{$url}' alt='{$name}' />";
   }
 
